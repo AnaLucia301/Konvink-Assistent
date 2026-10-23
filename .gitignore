@@ -1,0 +1,21 @@
+# Niemals Zugangsdaten/Secrets einchecken.
+config/secrets.json
+config/config.json
+
+# Build-Artefakte
+target/
+*.class
+
+# IDE
+.idea/
+*.iml
+
+# Portable JDK/Maven (lokal heruntergeladen, nicht Teil des Repos)
+/.venv/
+
+build_output.txt
+dependency-reduced-pom.xml
+__pycache__/
+*.pyc
+downloads/
+ki_chat/

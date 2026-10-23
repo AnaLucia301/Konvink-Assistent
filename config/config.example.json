@@ -1,0 +1,22 @@
+{
+  "konvink": {
+    "login_url": "https://app.konvink.ch/Security/Login",
+    "username": "DEIN_KONVINK_BENUTZER",
+    "_hinweis_passwort": "Passwort NICHT hier eintragen - wird sicher im Windows Credential Manager gespeichert oder per Windows-SSO automatisch erkannt.",
+    "navigation_pfad": [
+      "Mein Portfolio",
+      "Kompetenzentwicklung im Überblick",
+      "Bearbeiten",
+      "über alle Handlungskompetenzen"
+    ],
+    "filter_lehrjahr": "3. Lehrjahr 3/4"
+  },
+  "outlook": {
+    "standard_dauer_minuten": 60,
+    "standard_betreff_praefix": "Praxisauftrag: "
+  },
+  "ai_assist": {
+    "methode": "clipboard_teams",
+    "teams_deeplink": "msteams://teams.microsoft.com/l/chat/0/0?users=28:copilot"
+  }
+}
