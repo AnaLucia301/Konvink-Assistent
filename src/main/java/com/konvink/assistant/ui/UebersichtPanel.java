@@ -600,8 +600,23 @@ public class UebersichtPanel extends JPanel {
 
         if (sichtbar.isEmpty()) {
             if (auftraege.isEmpty()) {
-                auftraegePanel.add(UiKit.leerZustand("📂", "Keine Praxisaufträge",
-                        "Prüfe den Ordnerpfad in den Einstellungen (⚙)."));
+                JComponent leer = UiKit.leerZustand("📂", "Keine Praxisaufträge gefunden",
+                        "Lege deine Praxisauftrag-PDFs in diesen Ordner:\n" + AppStore.get().settings().ordner
+                                + "\n\noder wähle in den Einstellungen (⚙) einen anderen Ordner aus.");
+                JButton oeffnen = UiKit.secondaryButton("📁 Ordner öffnen");
+                oeffnen.setAlignmentX(Component.CENTER_ALIGNMENT);
+                oeffnen.addActionListener(e -> {
+                    try {
+                        Path ordner = Paths.get(AppStore.get().settings().ordner);
+                        java.nio.file.Files.createDirectories(ordner);
+                        Desktop.getDesktop().open(ordner.toFile());
+                    } catch (Exception ex) {
+                        JOptionPane.showMessageDialog(this, "Ordner konnte nicht geöffnet werden: " + ex.getMessage());
+                    }
+                });
+                auftraegePanel.add(leer);
+                auftraegePanel.add(Box.createVerticalStrut(8));
+                auftraegePanel.add(oeffnen);
             } else {
                 auftraegePanel.add(UiKit.leerZustand("🔍", "Keine Treffer",
                         nurFav ? "Du hast noch keine Favoriten markiert (☆ im Auftrag)."

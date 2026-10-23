@@ -19,3 +19,4 @@ __pycache__/
 *.pyc
 downloads/
 ki_chat/
+dist/

@@ -37,10 +37,21 @@ public final class AppStore {
     // ---------------------------------------------------------------- Daten
 
     public static final class Settings {
-        public String ordner = "downloads/Praxisauftraege_Lehrjahr3";
+        public String ordner = standardOrdner();
         public String modell = "llama3.2:1b";
         public boolean dunkel = true;
         public String akzent = "Violett";
+    }
+
+    /** Fester Praxisauftrags-Ordner im Benutzerverzeichnis (funktioniert auf jedem Geraet). */
+    private static String standardOrdner() {
+        Path p = Paths.get(System.getProperty("user.home"), "Konvink-Assistent", "Praxisauftraege");
+        try {
+            Files.createDirectories(p);
+        } catch (IOException ignored) {
+            // Ordner wird beim ersten Laden ggf. erneut versucht / vom Nutzer gewaehlt
+        }
+        return p.toString();
     }
 
     public static final class Fenster {
