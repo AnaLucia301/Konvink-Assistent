@@ -49,6 +49,7 @@ public class DetailView extends JPanel {
     private final JButton planButton = UiKit.secondaryButton("🗓 Planen");
     private final JButton tagButton = UiKit.secondaryButton("🏷 Tags");
     private final JButton erledigtButton = UiKit.secondaryButton("");
+    private final JButton begonnenButton = UiKit.secondaryButton("");
     private final JButton sternButton = UiKit.iconButton("☆", "Als Favorit markieren");
     private boolean trennerBereit;
     private JTextArea notizFeld;
@@ -165,10 +166,27 @@ public class DetailView extends JPanel {
             info.erledigt = !info.erledigt;
             AppStore.get().speichern();
             aktualisiereErledigt();
+            if (info.erledigt && !info.mailAbgeschlossenGesendet) {
+                info.mailAbgeschlossenGesendet = true;
+                AppStore.get().speichern();
+                com.konvink.assistant.service.PraxisbildnerMailer.benachrichtigeAbgeschlossen(auftrag);
+            }
+            beiAenderung.run();
+        });
+        begonnenButton.addActionListener(e -> {
+            info.begonnen = !info.begonnen;
+            AppStore.get().speichern();
+            aktualisiereBegonnen();
+            if (info.begonnen && !info.mailBegonnenGesendet) {
+                info.mailBegonnenGesendet = true;
+                AppStore.get().speichern();
+                com.konvink.assistant.service.PraxisbildnerMailer.benachrichtigeBegonnen(auftrag);
+            }
             beiAenderung.run();
         });
         rechts.add(planButton);
         rechts.add(tagButton);
+        rechts.add(begonnenButton);
         rechts.add(erledigtButton);
         JButton tagsButton = UiKit.iconButton("⋯", "Mehr: Tags, Planen");
         tagsButton.setFont(tagsButton.getFont().deriveFont(Font.BOLD, 20f));
@@ -195,6 +213,7 @@ public class DetailView extends JPanel {
         aktualisiereTags();
         aktualisiereStern();
         aktualisiereErledigt();
+        aktualisiereBegonnen();
         aktualisiereFrist();
         return kopf;
     }
@@ -320,6 +339,11 @@ public class DetailView extends JPanel {
     private void aktualisiereErledigt() {
         erledigtButton.setText(info.erledigt ? "✔ Erledigt" : "☐ Als erledigt markieren");
         erledigtButton.setForeground(info.erledigt ? Theme.LIME : Theme.TEXT);
+    }
+
+    private void aktualisiereBegonnen() {
+        begonnenButton.setText(info.begonnen ? "▶ Begonnen" : "○ Als begonnen markieren");
+        begonnenButton.setForeground(info.begonnen ? Theme.ORANGE : Theme.TEXT);
     }
 
     private void aktualisiereStern() {
@@ -635,6 +659,10 @@ public class DetailView extends JPanel {
                         if (alleFertig != info.erledigt) {
                             info.erledigt = alleFertig; // automatisch erledigt, sobald alles abgehakt ist
                             aktualisiereErledigt();
+                            if (info.erledigt && !info.mailAbgeschlossenGesendet) {
+                                info.mailAbgeschlossenGesendet = true;
+                                com.konvink.assistant.service.PraxisbildnerMailer.benachrichtigeAbgeschlossen(auftrag);
+                            }
                             beiAenderung.run();
                         }
                         AppStore.get().speichern();

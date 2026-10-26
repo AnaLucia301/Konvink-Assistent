@@ -37,21 +37,16 @@ public final class AppStore {
     // ---------------------------------------------------------------- Daten
 
     public static final class Settings {
-        public String ordner = standardOrdner();
+        public String ordner = "downloads/Praxisauftraege_Lehrjahr3";
         public String modell = "llama3.2:1b";
         public boolean dunkel = true;
         public String akzent = "Violett";
-    }
-
-    /** Fester Praxisauftrags-Ordner im Benutzerverzeichnis (funktioniert auf jedem Geraet). */
-    private static String standardOrdner() {
-        Path p = Paths.get(System.getProperty("user.home"), "Konvink-Assistent", "Praxisauftraege");
-        try {
-            Files.createDirectories(p);
-        } catch (IOException ignored) {
-            // Ordner wird beim ersten Laden ggf. erneut versucht / vom Nutzer gewaehlt
-        }
-        return p.toString();
+        /** E-Mail-Adresse des Praxisbildners/der Praxisbildnerin fuer automatische Benachrichtigungen. */
+        public String praxisbildnerEmail = "";
+        /** Ob bei Beginn/Abschluss eines Auftrags automatisch eine Outlook-Mail gesendet wird. */
+        public boolean mailBenachrichtigung = false;
+        /** Ob die Mail vor dem Versand zur Kontrolle angezeigt wird (statt direkt zu senden). */
+        public boolean mailVorAnzeigen = true;
     }
 
     public static final class Fenster {
@@ -80,6 +75,11 @@ public final class AppStore {
     public static final class AuftragInfo {
         public boolean favorit;
         public boolean erledigt;
+        /** Ob der Auftrag als "begonnen" markiert wurde (fuer Mail-Benachrichtigung). */
+        public boolean begonnen;
+        /** Verhindert doppelte Mails, wenn der Auftrag mehrfach umgeschaltet wird. */
+        public boolean mailBegonnenGesendet;
+        public boolean mailAbgeschlossenGesendet;
         /** Eigene Kategorien, z.B. "schwierig" oder "mit Chef klaeren". */
         public List<String> tags = new ArrayList<>();
         public String notiz = "";

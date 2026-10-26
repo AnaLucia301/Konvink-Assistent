@@ -74,6 +74,10 @@ public final class SettingsDialog {
         JComboBox<String> akzent = new JComboBox<>(Theme.AKZENT_AUSWAHL.keySet().toArray(new String[0]));
         akzent.setSelectedItem(s.akzent);
 
+        JTextField praxisbildnerMail = new JTextField(s.praxisbildnerEmail, 28);
+        JCheckBox mailAktiv = new JCheckBox("Bei Beginn/Abschluss automatisch Outlook-Mail senden", s.mailBenachrichtigung);
+        JCheckBox mailVorher = new JCheckBox("Mail vor dem Senden zur Kontrolle anzeigen (empfohlen)", s.mailVorAnzeigen);
+
         JPanel form = new JPanel(new GridBagLayout());
         form.setBorder(new EmptyBorder(6, 6, 6, 6));
         GridBagConstraints c = new GridBagConstraints();
@@ -109,7 +113,29 @@ public final class SettingsDialog {
         c.gridx = 1;
         c.gridwidth = 2;
         form.add(akzent, c);
+        c.gridwidth = 1;
+        c.gridx = 0;
         c.gridy = 4;
+        form.add(new JLabel("Praxisbildner E-Mail"), c);
+        c.gridx = 1;
+        c.gridwidth = 2;
+        form.add(praxisbildnerMail, c);
+        c.gridwidth = 1;
+        c.gridx = 0;
+        c.gridy = 5;
+        form.add(new JLabel("Benachrichtigung"), c);
+        c.gridx = 1;
+        c.gridwidth = 2;
+        JPanel mailZeile = new JPanel();
+        mailZeile.setOpaque(false);
+        mailZeile.setLayout(new BoxLayout(mailZeile, BoxLayout.Y_AXIS));
+        mailAktiv.setAlignmentX(Component.LEFT_ALIGNMENT);
+        mailVorher.setAlignmentX(Component.LEFT_ALIGNMENT);
+        mailZeile.add(mailAktiv);
+        mailZeile.add(mailVorher);
+        form.add(mailZeile, c);
+        c.gridwidth = 1;
+        c.gridy = 6;
         c.gridx = 1;
         JLabel hinweis = new JLabel("Theme und Akzentfarbe gelten nach einem Neustart.");
         hinweis.setForeground(Theme.MUTED);
@@ -134,7 +160,7 @@ public final class SettingsDialog {
         werkzeuge.add(log);
         werkzeuge.add(sichern);
         werkzeuge.add(laden);
-        c.gridy = 5;
+        c.gridy = 7;
         c.gridx = 0;
         c.gridwidth = 3;
         form.add(werkzeuge, c);
@@ -147,6 +173,9 @@ public final class SettingsDialog {
         boolean ordnerNeu = !ordner.getText().trim().equals(s.ordner);
         boolean designNeu = dunkel.isSelected() != s.dunkel || !String.valueOf(akzent.getSelectedItem()).equals(s.akzent);
         s.ordner = ordner.getText().trim();
+        s.praxisbildnerEmail = praxisbildnerMail.getText().trim();
+        s.mailBenachrichtigung = mailAktiv.isSelected();
+        s.mailVorAnzeigen = mailVorher.isSelected();
         Object m = modell.getSelectedItem();
         if (m != null && !m.toString().isBlank()) {
             s.modell = m.toString().trim();

@@ -25,11 +25,35 @@ public final class OutlookIntegration {
             DateTimeFormatter.ofPattern("MM/dd/yyyy HH:mm");
 
     private static final int OL_APPOINTMENT_ITEM = 1;
+    private static final int OL_MAIL_ITEM = 0;
     private static final int OL_BUSY = 2;
     private static final int OL_FREE = 0;
     private static final int OL_FOLDER_CALENDAR = 9;
 
     private OutlookIntegration() {
+    }
+
+    /**
+     * Erstellt eine E-Mail in Outlook und sendet sie direkt.
+     *
+     * @param show falls true, wird die Mail nur geoeffnet (zur Kontrolle durch den Nutzer),
+     *             statt automatisch gesendet zu werden.
+     */
+    public static void sendeMail(String an, String betreff, String text, boolean show) {
+        ActiveXComponent outlook = new ActiveXComponent("Outlook.Application");
+        try {
+            Dispatch mail = Dispatch.call(outlook, "CreateItem", OL_MAIL_ITEM).toDispatch();
+            Dispatch.put(mail, "To", an);
+            Dispatch.put(mail, "Subject", betreff);
+            Dispatch.put(mail, "Body", text == null ? "" : text);
+            if (show) {
+                Dispatch.call(mail, "Display");
+            } else {
+                Dispatch.call(mail, "Send");
+            }
+        } finally {
+            outlook.safeRelease();
+        }
     }
 
     /** Erstellt einen Termin in Outlook und speichert ihn direkt (ohne Anzeige). */
