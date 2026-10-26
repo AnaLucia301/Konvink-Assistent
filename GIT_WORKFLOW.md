@@ -63,3 +63,11 @@ Vor dem Commit mit `git status` prüfen, dass keine dieser Dateien aufgelistet i
 | Alten Stand ansehen | `git log --oneline` |
 | Push abgelehnt | erst `git pull`, dann nochmal `git push` |
 | Beim Push erscheint eine Anmeldung | Im Browser mit dem GitHub-Konto bestätigen |
+
+## Eigenständige Windows-App für andere bauen
+
+`build-standalone.bat` ausführen (Doppelklick oder im Terminal). Das Skript baut das Projekt,
+erzeugt mit `jpackage` eine eigenständige App (Java ist enthalten) und packt alles zusammen mit
+`LIESMICH.txt` in `dist\Konvink-Assistent-Windows.zip`. Diese ZIP kannst du weitergeben – andere
+brauchen weder Java noch VS Code, nur optional [Ollama](https://ollama.com) für die KI-Funktionen.
+

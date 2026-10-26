@@ -1,0 +1,36 @@
+Konvink Assistent – Installation ohne Entwicklungsumgebung
+============================================================
+
+1. Entpacke "Konvink-Assistent-Windows.zip" an einen beliebigen Ort
+   (z.B. Desktop oder Dokumente). Du brauchst KEIN Java und KEIN VS Code,
+   alles Nötige ist in diesem Ordner enthalten.
+
+2. Starte die App per Doppelklick auf:
+   Konvink-Assistent\Konvink-Assistent.exe
+
+3. Eigene Praxisaufträge einfügen:
+   Beim ersten Start legt die App automatisch diesen Ordner an:
+      %USERPROFILE%\Konvink-Assistent\Praxisauftraege
+   (also z.B. C:\Users\DeinName\Konvink-Assistent\Praxisauftraege)
+
+   Lege deine Praxisauftrag-PDFs einfach in diesen Ordner und klicke in
+   der App oben rechts auf "↻" zum Neuladen. In der Übersicht gibt es
+   dafür auch einen Knopf "📁 Ordner öffnen", solange noch keine PDFs
+   gefunden wurden.
+
+   Einen anderen Ordner wählst du über das Zahnrad (⚙ Einstellungen).
+
+4. KI-Funktionen (Chat, Checklisten-Vorschläge, Kombi-Begründungen, Planen):
+   Dafür brauchst du zusätzlich Ollama (kostenlos): https://ollama.com
+   Nach der Installation einmal in einer Konsole ausführen:
+      ollama pull llama3.2:1b
+   Ohne Ollama funktioniert die App trotzdem: PDFs ansehen, Kombi-Gruppen,
+   Favoriten, Notizen, Checklisten, Fristen, Kalender und Zeitblöcke
+   funktionieren auch ohne KI.
+
+5. Deine Daten (Notizen, Favoriten, Fristen, Chatverlauf) liegen in:
+      %USERPROFILE%\.konvink-assistant\state.json
+   In den Einstellungen kannst du davon jederzeit eine Sicherung erstellen
+   oder eine Sicherung auf einem anderen Gerät wieder einspielen.
+
+Viel Erfolg mit den Praxisaufträgen!
