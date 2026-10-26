@@ -47,6 +47,13 @@ public final class AppStore {
         public boolean mailBenachrichtigung = false;
         /** Ob die Mail vor dem Versand zur Kontrolle angezeigt wird (statt direkt zu senden). */
         public boolean mailVorAnzeigen = true;
+        /**
+         * Beispieltext eines bereits fertig geschriebenen/erledigten Praxisauftrags
+         * (Musterlösung), den der Nutzer in den Einstellungen hinterlegen kann.
+         * Wird der KI bei Lösungsvorschlaegen/Checklisten/Kombi-Fusion als Stil- und
+         * Aufbau-Vorlage mitgegeben, damit die Ausgabe diesem Format aehnelt.
+         */
+        public String beispielLoesung = "";
     }
 
     public static final class Fenster {

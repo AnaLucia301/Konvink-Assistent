@@ -548,6 +548,7 @@ public class DetailView extends JPanel {
                 + "max. 5 Punkten, ohne Einleitung oder Schlusswort. Verwende KEINE "
                 + "Markdown-Formatierung - nur Klartext mit Zeilenumbruechen.\n\n"
                 + AiAssist.buildPraxisauftragPrompt(auftrag);
+        prompt = AiAssist.mitStilVorlage(prompt);
         KiBlock block = new KiBlock(prompt, 400, text -> {
             info.loesungen = text;
             AppStore.get().speichern();
@@ -730,13 +731,14 @@ public class DetailView extends JPanel {
             sb.append("--- Ausgangsauftrag ").append(++i).append(" ---\n")
                     .append(roh.length() > 1200 ? roh.substring(0, 1200) : roh).append("\n\n");
         }
+        String fusionsPrompt = AiAssist.mitStilVorlage(sb.toString());
 
         JDialog dlg = new JDialog((Frame) SwingUtilities.getWindowAncestor(this), "Kombi-Auftrag wird erstellt …", true);
         JPanel inhalt = neuerStapel();
         inhalt.add(UiKit.sectionHeading("Neuer Kombi-Auftrag aus " + gewaehlt.size() + " Aufträgen"));
         inhalt.add(Box.createVerticalStrut(8));
         String[] ergebnis = new String[1];
-        KiBlock block = new KiBlock(sb.toString(), 700, text -> ergebnis[0] = text);
+        KiBlock block = new KiBlock(fusionsPrompt, 700, text -> ergebnis[0] = text);
         inhalt.add(block);
         JScrollPane scroll = UiKit.scroll(inhalt);
         scroll.setPreferredSize(new Dimension(620, 480));
@@ -853,9 +855,10 @@ public class DetailView extends JPanel {
             protected String doInBackground() throws Exception {
                 OllamaChatService s = new OllamaChatService();
                 s.setMaxTokens(400);
-                return s.sendeNachricht("Liste die einzelnen Teilaufgaben des folgenden Praxisauftrags auf. "
+                return s.sendeNachricht(AiAssist.mitStilVorlage(
+                        "Liste die einzelnen Teilaufgaben des folgenden Praxisauftrags auf. "
                         + "Pro Zeile genau eine kurze Aufgabe (max. 15 Woerter), ohne Nummerierung und ohne "
-                        + "Einleitung.\n\n" + AiAssist.buildPraxisauftragPrompt(auftrag));
+                        + "Einleitung.\n\n" + AiAssist.buildPraxisauftragPrompt(auftrag)));
             }
 
             @Override

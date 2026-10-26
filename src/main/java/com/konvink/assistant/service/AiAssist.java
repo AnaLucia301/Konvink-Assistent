@@ -45,6 +45,27 @@ public final class AiAssist {
         return sb.toString();
     }
 
+    /**
+     * Haengt - falls in den Einstellungen hinterlegt - eine Musterloesung eines
+     * frueheren, bereits erledigten Praxisauftrags als Stil-/Aufbau-Vorlage an
+     * den Prompt an ("Few-Shot"-Beispiel). So orientiert sich die KI-Ausgabe am
+     * gewuenschten Format (Abschnitte, Tonfall, Laenge), ohne dass ein eigenes
+     * Modell trainiert werden muss - Ollama-Modelle koennen nicht nachtraeglich
+     * trainiert werden, aber ein gutes Beispiel im Prompt wirkt sehr aehnlich.
+     */
+    public static String mitStilVorlage(String prompt) {
+        String beispiel = com.konvink.assistant.store.AppStore.get().settings().beispielLoesung;
+        if (beispiel == null || beispiel.isBlank()) {
+            return prompt;
+        }
+        String gekuerzt = beispiel.length() > 3000 ? beispiel.substring(0, 3000) + "..." : beispiel;
+        return prompt + "\n\n--- STIL- UND AUFBAUVORLAGE (Beispiel eines frueher fertig geschriebenen, "
+                + "bereits bewerteten Praxisauftrags) ---\n"
+                + "Orientiere dich bei Aufbau, Abschnitten, Tonfall und Detailtiefe an diesem Beispiel, "
+                + "uebernimm aber NICHT dessen Inhalte 1:1, sondern schreibe passend zum aktuellen Auftrag:\n\n"
+                + gekuerzt;
+    }
+
     /** Kopiert den Prompt in die Zwischenablage und oeffnet Teams Copilot. */
     public static void prepareAiTextRequest(String promptText) {
         copyToClipboard(promptText);

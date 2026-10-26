@@ -155,11 +155,14 @@ public final class SettingsDialog {
                 JOptionPane.showMessageDialog(parent, "Logdatei nicht verfügbar: " + ex.getMessage());
             }
         });
+        JButton stilVorlage = UiKit.secondaryButton("🎓 KI-Stilvorlage bearbeiten …");
+        stilVorlage.addActionListener(e -> stilVorlageBearbeiten(parent));
         JPanel werkzeuge = new JPanel(new GridLayout(0, 2, 6, 6));
         werkzeuge.add(pull);
         werkzeuge.add(log);
         werkzeuge.add(sichern);
         werkzeuge.add(laden);
+        werkzeuge.add(stilVorlage);
         c.gridy = 7;
         c.gridx = 0;
         c.gridwidth = 3;
@@ -280,6 +283,38 @@ public final class SettingsDialog {
                 }
             }
         }.execute();
+    }
+
+    /**
+     * Zeigt einen grossen Texteditor, in dem der Nutzer die Musterloesung eines
+     * frueher bereits fertig geschriebenen Praxisauftrags einfuegen kann. Dieser
+     * Text wird danach allen KI-Anfragen (Loesungsvorschlaege, Checkliste,
+     * Kombi-Fusion) als Stil-/Aufbau-Vorlage mitgegeben, damit die Ausgaben
+     * aehnlich aufgebaut sind wie das Beispiel.
+     */
+    private static void stilVorlageBearbeiten(JFrame parent) {
+        AppStore.Settings s = AppStore.get().settings();
+        JTextArea feld = new JTextArea(s.beispielLoesung, 18, 60);
+        feld.setLineWrap(true);
+        feld.setWrapStyleWord(true);
+        JScrollPane scroll = new JScrollPane(feld);
+
+        JPanel inhalt = new JPanel(new BorderLayout(0, 8));
+        inhalt.add(new JLabel("<html><div style='width:480px'>Füge hier den Text eines bereits "
+                + "fertig geschriebenen, bewerteten Praxisauftrags ein (z.B. per Kopieren aus Konvink). "
+                + "Die KI orientiert sich künftig an Aufbau, Abschnitten und Tonfall dieses Beispiels, "
+                + "ohne dessen Inhalte zu übernehmen.</div></html>"), BorderLayout.NORTH);
+        inhalt.add(scroll, BorderLayout.CENTER);
+
+        int antwort = JOptionPane.showConfirmDialog(parent, inhalt, "KI-Stilvorlage",
+                JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
+        if (antwort == JOptionPane.OK_OPTION) {
+            s.beispielLoesung = feld.getText().trim();
+            AppStore.get().speichern();
+            JOptionPane.showMessageDialog(parent, s.beispielLoesung.isEmpty()
+                    ? "Stilvorlage entfernt."
+                    : "Stilvorlage gespeichert (" + s.beispielLoesung.length() + " Zeichen).");
+        }
     }
 
     /** Fragt, ob die App jetzt neu gestartet werden soll (noetig fuer Theme-Wechsel). */
