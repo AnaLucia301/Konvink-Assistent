@@ -40,6 +40,14 @@ public final class OutlookIntegration {
      *             statt automatisch gesendet zu werden.
      */
     public static void sendeMail(String an, String betreff, String text, boolean show) {
+        boolean comInitialisiert = false;
+        try {
+            com.jacob.com.ComThread.InitSTA();
+            comInitialisiert = true;
+        } catch (Throwable t) {
+            // Manche Jacob-Versionen werfen, wenn der Thread schon initialisiert ist - ignorieren.
+            LOGGER.log(Level.FINE, "ComThread.InitSTA() uebersprungen", t);
+        }
         ActiveXComponent outlook = new ActiveXComponent("Outlook.Application");
         try {
             Dispatch mail = Dispatch.call(outlook, "CreateItem", OL_MAIL_ITEM).toDispatch();
@@ -48,11 +56,27 @@ public final class OutlookIntegration {
             Dispatch.put(mail, "Body", text == null ? "" : text);
             if (show) {
                 Dispatch.call(mail, "Display");
+                LOGGER.info("Mail-Entwurf an " + an + " angezeigt (Display aufgerufen, Subject: " + betreff + ")");
+                try {
+                    // Fenster in den Vordergrund holen, damit es nicht uebersehen wird.
+                    Dispatch inspector = Dispatch.call(mail, "GetInspector").toDispatch();
+                    Dispatch.call(inspector, "Activate");
+                } catch (Throwable t) {
+                    LOGGER.log(Level.FINE, "Inspector konnte nicht aktiviert werden", t);
+                }
             } else {
                 Dispatch.call(mail, "Send");
+                LOGGER.info("Mail an " + an + " gesendet (Subject: " + betreff + ")");
             }
         } finally {
             outlook.safeRelease();
+            if (comInitialisiert) {
+                try {
+                    com.jacob.com.ComThread.Release();
+                } catch (Throwable ignore) {
+                    // Release-Fehler hier bewusst ignorieren.
+                }
+            }
         }
     }
 

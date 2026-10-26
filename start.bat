@@ -5,4 +5,4 @@ if not exist "target\konvink-assistant.jar" (
     echo JAR nicht gefunden - baue Projekt mit Maven ...
     call mvn -q package -DskipTests
 )
-start "" javaw -jar "target\konvink-assistant.jar"
+start "" javaw -Djava.library.path="%~dp0natives" -jar "target\konvink-assistant.jar"
