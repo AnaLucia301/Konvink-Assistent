@@ -40,6 +40,7 @@ public class DetailView extends JPanel {
 
     private final Praxisauftrag auftrag;
     private final List<KombiVorschlag> vorschlaege;
+    private final List<Praxisauftrag> alleAuftraege;
     private final Consumer<Praxisauftrag> oeffne;
     private final Runnable beiAenderung;
     private final AuftragInfo info;
@@ -56,8 +57,14 @@ public class DetailView extends JPanel {
 
     public DetailView(Praxisauftrag auftrag, List<KombiVorschlag> vorschlaege,
                       Consumer<Praxisauftrag> oeffne, Runnable zurueck, Runnable beiAenderung) {
+        this(auftrag, vorschlaege, List.of(), oeffne, zurueck, beiAenderung);
+    }
+
+    public DetailView(Praxisauftrag auftrag, List<KombiVorschlag> vorschlaege, List<Praxisauftrag> alleAuftraege,
+                      Consumer<Praxisauftrag> oeffne, Runnable zurueck, Runnable beiAenderung) {
         super(new BorderLayout());
         this.auftrag = auftrag;
+        this.alleAuftraege = alleAuftraege;
         this.vorschlaege = vorschlaege;
         this.oeffne = oeffne;
         this.beiAenderung = beiAenderung;
@@ -560,6 +567,8 @@ public class DetailView extends JPanel {
         if (gruppe.size() < 2) {
             p.add(UiKit.leerZustand("🧩", "Keine Kombi-Partner",
                     "Zu diesem Auftrag passt aktuell kein weiterer Auftrag inhaltlich."));
+            p.add(Box.createVerticalStrut(14));
+            p.add(baueManuellKombinierenZeile());
             return UiKit.scroll(p);
         }
         p.add(UiKit.sectionHeading("Kombi-Gruppe (" + gruppe.size() + " Aufträge)"));
@@ -611,6 +620,7 @@ public class DetailView extends JPanel {
         platz.setAlignmentX(Component.LEFT_ALIGNMENT);
         p.add(platz);
 
+
         warum.addActionListener(e -> {
             StringBuilder sb = new StringBuilder("Du bist Ausbildungsberater. Die folgenden Praxisauftraege sollen "
                     + "als Kombi-Auftrag gemeinsam bearbeitet werden. Erklaere kurz auf Deutsch (max. 8 Saetze, "
@@ -628,7 +638,133 @@ public class DetailView extends JPanel {
             block.start();
             platz.revalidate();
         });
+        p.add(Box.createVerticalStrut(18));
+        p.add(new JSeparator());
+        p.add(Box.createVerticalStrut(10));
+        p.add(baueManuellKombinierenZeile());
         return UiKit.scroll(p);
+    }
+
+    /** Zeile mit Button, um manuell beliebige Aufträge per Dialog zu einem Kombi-Auftrag zu fusionieren. */
+    private JComponent baueManuellKombinierenZeile() {
+        JPanel box = new JPanel();
+        box.setOpaque(false);
+        box.setLayout(new BoxLayout(box, BoxLayout.Y_AXIS));
+        box.setAlignmentX(Component.LEFT_ALIGNMENT);
+        box.add(UiKit.sectionHeading("Eigenen Kombi-Auftrag erstellen"));
+        box.add(Box.createVerticalStrut(6));
+        WrapLabel hinweis = new WrapLabel(
+                "Wähle selbst beliebige Praxisaufträge aus allen PDFs aus und lass die KI daraus "
+                        + "einen gemeinsamen Kombi-Auftrag formulieren.", Theme.MUTED);
+        hinweis.setAlignmentX(Component.LEFT_ALIGNMENT);
+        box.add(hinweis);
+        box.add(Box.createVerticalStrut(8));
+        JButton manuell = UiKit.primaryButton("🔀 Aufträge auswählen & fusionieren …");
+        manuell.setAlignmentX(Component.LEFT_ALIGNMENT);
+        manuell.addActionListener(e -> manuellKombinieren());
+        JPanel zeile2 = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
+        zeile2.setOpaque(false);
+        zeile2.setAlignmentX(Component.LEFT_ALIGNMENT);
+        zeile2.add(manuell);
+        box.add(zeile2);
+        return box;
+    }
+
+    /** Dialog: alle verfügbaren Aufträge als Checkboxen, danach KI-Fusion der gewählten. */
+    private void manuellKombinieren() {
+        if (alleAuftraege == null || alleAuftraege.size() < 2) {
+            JOptionPane.showMessageDialog(this,
+                    "Es sind nicht genügend Praxisaufträge geladen, um welche zu kombinieren.");
+            return;
+        }
+        List<JCheckBox> boxen = new ArrayList<>();
+        VerticalStackPanel liste = neuerStapel();
+        for (Praxisauftrag a : alleAuftraege) {
+            JCheckBox box = new JCheckBox(UiKit.name(a), a == auftrag);
+            box.setOpaque(false);
+            box.setForeground(Theme.TEXT);
+            box.setAlignmentX(Component.LEFT_ALIGNMENT);
+            box.putClientProperty("auftrag", a);
+            boxen.add(box);
+            liste.add(box);
+            liste.add(Box.createVerticalStrut(4));
+        }
+        JScrollPane scroll = UiKit.scroll(liste);
+        scroll.setPreferredSize(new Dimension(420, 380));
+
+        JPanel inhalt = new JPanel(new BorderLayout(0, 8));
+        inhalt.add(new WrapLabel("Wähle mindestens 2 Praxisaufträge aus, die zu einem Kombi-Auftrag "
+                + "zusammengeführt werden sollen:", Theme.TEXT), BorderLayout.NORTH);
+        inhalt.add(scroll, BorderLayout.CENTER);
+
+        int antwort = JOptionPane.showConfirmDialog(this, inhalt, "Kombi-Auftrag erstellen",
+                JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
+        if (antwort != JOptionPane.OK_OPTION) {
+            return;
+        }
+
+        List<Praxisauftrag> gewaehlt = new ArrayList<>();
+        for (JCheckBox box : boxen) {
+            if (box.isSelected()) {
+                gewaehlt.add((Praxisauftrag) box.getClientProperty("auftrag"));
+            }
+        }
+        if (gewaehlt.size() < 2) {
+            JOptionPane.showMessageDialog(this, "Bitte wähle mindestens 2 Praxisaufträge aus.");
+            return;
+        }
+        zeigeFusionsDialog(gewaehlt);
+    }
+
+    /** Baut den Fusions-Prompt, startet die KI-Anfrage und zeigt das Ergebnis in einem Dialog. */
+    private void zeigeFusionsDialog(List<Praxisauftrag> gewaehlt) {
+        StringBuilder sb = new StringBuilder("Du bist Ausbildungsberater fuer die kaufmaennische Grundbildung. "
+                + "Die folgenden " + gewaehlt.size() + " Praxisauftraege sollen zu EINEM gemeinsamen Kombi-Auftrag "
+                + "verschmolzen werden. Erstelle daraus einen neuen, zusammenhaengenden Praxisauftrag-Text auf "
+                + "Deutsch mit folgendem Aufbau: Titel, Ausgangslage (2-3 Saetze), Aufgabenstellung als "
+                + "nummerierte Teilaufgaben (die Inhalte aller Ausgangsauftraege sinnvoll kombiniert und nicht "
+                + "einfach nur aneinandergereiht). Keine Markdown-Formatierung, nur Klartext mit Zeilenumbruechen.\n\n");
+        int i = 0;
+        for (Praxisauftrag a : gewaehlt) {
+            String roh = AiAssist.buildPraxisauftragPrompt(a);
+            sb.append("--- Ausgangsauftrag ").append(++i).append(" ---\n")
+                    .append(roh.length() > 1200 ? roh.substring(0, 1200) : roh).append("\n\n");
+        }
+
+        JDialog dlg = new JDialog((Frame) SwingUtilities.getWindowAncestor(this), "Kombi-Auftrag wird erstellt …", true);
+        JPanel inhalt = neuerStapel();
+        inhalt.add(UiKit.sectionHeading("Neuer Kombi-Auftrag aus " + gewaehlt.size() + " Aufträgen"));
+        inhalt.add(Box.createVerticalStrut(8));
+        String[] ergebnis = new String[1];
+        KiBlock block = new KiBlock(sb.toString(), 700, text -> ergebnis[0] = text);
+        inhalt.add(block);
+        JScrollPane scroll = UiKit.scroll(inhalt);
+        scroll.setPreferredSize(new Dimension(620, 480));
+
+        JButton kopieren = UiKit.secondaryButton("📋 In Notizen übernehmen");
+        kopieren.addActionListener(e -> {
+            if (ergebnis[0] != null && notizFeld != null) {
+                String alt = notizFeld.getText();
+                notizFeld.setText(alt.isBlank() ? ergebnis[0] : alt + "\n\n" + ergebnis[0]);
+                JOptionPane.showMessageDialog(dlg, "In die Notizen dieses Auftrags übernommen.");
+            } else {
+                JOptionPane.showMessageDialog(dlg, "Noch kein Ergebnis vorhanden – bitte warten, bis die KI fertig ist.");
+            }
+        });
+        JButton schliessen = UiKit.secondaryButton("Schliessen");
+        schliessen.addActionListener(e -> dlg.dispose());
+        JPanel suedZeile = new JPanel(new FlowLayout(FlowLayout.RIGHT, 8, 8));
+        suedZeile.add(kopieren);
+        suedZeile.add(schliessen);
+
+        JPanel wurzel = new JPanel(new BorderLayout());
+        wurzel.add(scroll, BorderLayout.CENTER);
+        wurzel.add(suedZeile, BorderLayout.SOUTH);
+        dlg.setContentPane(wurzel);
+        dlg.pack();
+        dlg.setLocationRelativeTo(this);
+        block.start();
+        dlg.setVisible(true);
     }
 
     private JComponent baueCheckliste() {

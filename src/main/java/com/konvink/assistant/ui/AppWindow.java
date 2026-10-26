@@ -137,7 +137,7 @@ public class AppWindow extends JFrame {
             detail.schliessen();
             cards.remove(detail);
         }
-        detail = new DetailView(auftrag, uebersicht.getVorschlaege(), this::oeffne, this::zurueck,
+        detail = new DetailView(auftrag, uebersicht.getVorschlaege(), uebersicht.getAuftraege(), this::oeffne, this::zurueck,
                 uebersicht::aktualisiereFristen);
         cards.add(detail, CARD_DETAIL);
         cardLayout.show(cards, CARD_DETAIL);
