@@ -21,9 +21,16 @@ Konvink Assistent – Installation ohne Entwicklungsumgebung
    Einen anderen Ordner wählst du über das Zahnrad (⚙ Einstellungen).
 
 4. KI-Funktionen (Chat, Checklisten-Vorschläge, Kombi-Begründungen, Planen):
-   Dafür brauchst du zusätzlich Ollama (kostenlos): https://ollama.com
-   Nach der Installation einmal in einer Konsole ausführen:
-      ollama pull llama3.2:1b
+   Dafür brauchst du zusätzlich Ollama (kostenlos). Doppelklicke einfach auf:
+      KI-Funktionen-einrichten.bat
+   Das Skript lädt Ollama herunter, installiert es, startet es und lädt
+   automatisch das KI-Modell "llama3.2:1b" (ca. 1.3 GB). Fenster bitte
+   offen lassen, bis "Fertig!" erscheint. Danach den Konvink Assistenten
+   (neu) starten.
+
+   Falls du es lieber manuell machst: https://ollama.com installieren,
+   danach in einer Konsole ausführen: ollama pull llama3.2:1b
+
    Ohne Ollama funktioniert die App trotzdem: PDFs ansehen, Kombi-Gruppen,
    Favoriten, Notizen, Checklisten, Fristen, Kalender und Zeitblöcke
    funktionieren auch ohne KI.
